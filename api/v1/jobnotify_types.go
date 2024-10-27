@@ -17,19 +17,19 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // JobNotifySpec defines the desired state of JobNotify
 type JobNotifySpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Slack       NotifySlack          `json:"slack,omitempty"`
+	JobSelector metav1.LabelSelector `json:"jobSelector,omitempty"`
+}
 
-	// Foo is an example field of JobNotify. Edit jobnotify_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+type NotifySlack struct {
+	WebhookURL corev1.EnvVarSource `json:"webhookURL,omitempty"`
+	Channel    corev1.EnvVarSource `json:"channel,omitempty"`
 }
 
 // JobNotifyStatus defines the observed state of JobNotify
