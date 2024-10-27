@@ -23,13 +23,21 @@ import (
 
 // JobNotifySpec defines the desired state of JobNotify
 type JobNotifySpec struct {
-	Slack       NotifySlack          `json:"slack,omitempty"`
+	// +optional
+	Slack       *NotifySlack         `json:"slack,omitempty"`
 	JobSelector metav1.LabelSelector `json:"jobSelector,omitempty"`
 }
 
 type NotifySlack struct {
-	WebhookURL corev1.EnvVarSource `json:"webhookURL,omitempty"`
-	Channel    corev1.EnvVarSource `json:"channel,omitempty"`
+	WebhookURL Var `json:"webhookURL,omitempty"`
+	Channel    Var `json:"channel,omitempty"`
+}
+
+type Var struct {
+	// +optional
+	Value string `json:"value,omitempty"`
+	// +optional
+	ValueFrom *corev1.EnvVarSource `json:"valueFrom,omitempty"`
 }
 
 // JobNotifyStatus defines the observed state of JobNotify

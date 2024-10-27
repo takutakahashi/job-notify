@@ -73,7 +73,6 @@ func NotifyJob(ctx context.Context, client client.Client, jobnotify *v1.JobNotif
 	logger := log.FromContext(ctx)
 	logger.Info("notify job", "job", job.Name)
 	if jobnotify.Spec.Slack != nil {
-		NotifySlack(ctx, client, jobnotify, job)
 	}
 }
 
