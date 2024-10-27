@@ -2,8 +2,7 @@ name: Release Charts
 
 on:
   push:
-    branches:
-      - main
+    tags:
 
 jobs:
   release:
@@ -17,12 +16,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: tag name
+        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: parse submodue/version
+        run: |
+          INPUT=${{ env.TAG_NAME }}
+          APP_NAME=$(echo "$INPUT" | cut -d'/' -f1)
+          VERSION=$(echo "$INPUT" | cut -d'/' -f2)
+          echo "APP=$APP_NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Chart | Push
         uses: appany/helm-oci-chart-releaser@v0.3.0
         with:
           name: job-notify
           repository: takutakahashi/job-notify/charts
-          tag: 0.1.1
+          tag: ${{ env.VERSION }}
           registry: ghcr.io
           registry_username: ${{ github.actor }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
