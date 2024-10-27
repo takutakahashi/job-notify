@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- notify_v1_jobnotify.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

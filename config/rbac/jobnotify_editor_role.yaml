@@ -1,0 +1,27 @@
+# permissions for end users to edit jobnotifies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: job-notify
+    app.kubernetes.io/managed-by: kustomize
+  name: jobnotify-editor-role
+rules:
+- apiGroups:
+  - notify.takutakahashi.dev
+  resources:
+  - jobnotifies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - notify.takutakahashi.dev
+  resources:
+  - jobnotifies/status
+  verbs:
+  - get

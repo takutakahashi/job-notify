@@ -1,0 +1,9 @@
+apiVersion: notify.takutakahashi.dev/v1
+kind: JobNotify
+metadata:
+  labels:
+    app.kubernetes.io/name: job-notify
+    app.kubernetes.io/managed-by: kustomize
+  name: jobnotify-sample
+spec:
+  # TODO(user): Add fields here

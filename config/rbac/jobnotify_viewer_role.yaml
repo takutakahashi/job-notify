@@ -1,0 +1,23 @@
+# permissions for end users to view jobnotifies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: job-notify
+    app.kubernetes.io/managed-by: kustomize
+  name: jobnotify-viewer-role
+rules:
+- apiGroups:
+  - notify.takutakahashi.dev
+  resources:
+  - jobnotifies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - notify.takutakahashi.dev
+  resources:
+  - jobnotifies/status
+  verbs:
+  - get
