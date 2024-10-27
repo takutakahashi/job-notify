@@ -17,8 +17,13 @@ limitations under the License.
 package controller
 
 import (
+	"bytes"
 	"context"
+	"html/template"
+	"os"
 
+	"github.com/k1LoW/slkm"
+	"github.com/nlopes/slack"
 	v1 "github.com/takutakahashi/job-notify/api/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -72,8 +77,47 @@ func (r *JobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 func NotifyJob(ctx context.Context, client client.Client, jobnotify *v1.JobNotify, job *batchv1.Job) {
 	logger := log.FromContext(ctx)
 	logger.Info("notify job", "job", job.Name)
-	if jobnotify.Spec.Slack != nil {
+	webhook := os.Getenv("SLACK_WEBHOOK")
+	channel := os.Getenv("SLACK_CHANNEL")
+
+	c, err := slkm.New()
+	if err != nil {
+		return err
 	}
+	c.SetUsername("job-notify")
+	c.SetWebhookURL(webhook)
+	blocks := []slack.Block{
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", message(job), false, false), nil, nil),
+	}
+	if err := c.PostMessage(ctx, channel, blocks...); err != nil {
+		return err
+	}
+}
+
+func message(job *batchv1.Job) (string, error) {
+	tpl := `Job name: {{ .Name }}
+	Status: {{ .Status }}`
+	t, err := template.New("job").Parse(tpl)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, struct {
+		Name   string
+		Status string
+	}{Name: job.Name, Status: jobStatus(job)}); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+func jobStatus(job *batchv1.Job) string {
+	if job.Status.Succeeded > 0 {
+		return "Succeeded"
+	}
+	if job.Status.Failed > 0 {
+		return "Failed"
+	}
+	return "Running"
 }
 
 func IsMatchedJob(job *batchv1.Job, selector map[string]string) bool {
