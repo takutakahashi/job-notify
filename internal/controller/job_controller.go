@@ -23,7 +23,7 @@ import (
 	"os"
 
 	"github.com/k1LoW/slkm"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 	v1 "github.com/takutakahashi/job-notify/api/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -74,7 +74,7 @@ func (r *JobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	return ctrl.Result{}, nil
 }
 
-func NotifyJob(ctx context.Context, client client.Client, jobnotify *v1.JobNotify, job *batchv1.Job) {
+func NotifyJob(ctx context.Context, client client.Client, jobnotify *v1.JobNotify, job *batchv1.Job) error {
 	logger := log.FromContext(ctx)
 	logger.Info("notify job", "job", job.Name)
 	webhook := os.Getenv("SLACK_WEBHOOK")
@@ -86,12 +86,14 @@ func NotifyJob(ctx context.Context, client client.Client, jobnotify *v1.JobNotif
 	}
 	c.SetUsername("job-notify")
 	c.SetWebhookURL(webhook)
-	blocks := []slack.Block{
-		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", message(job), false, false), nil, nil),
-	}
-	if err := c.PostMessage(ctx, channel, blocks...); err != nil {
+	m, err := message(job)
+	if err != nil {
 		return err
 	}
+	blocks := []slack.Block{
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", m, false, false), nil, nil),
+	}
+	return c.PostMessage(ctx, channel, blocks...)
 }
 
 func message(job *batchv1.Job) (string, error) {
